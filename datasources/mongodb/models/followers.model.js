@@ -1,5 +1,5 @@
-const mongoose = require('mongoose');
-const { STATUS } = require('../../../constants/followers.constant');
+const mongoose = require("mongoose");
+const { STATUS } = require("../../../constants/followers.constant");
 
 const { Schema } = mongoose;
 
@@ -15,4 +15,4 @@ const FollowersSchema = new Schema({
     }
 }, { versionKey: false, timestamps: true });
 
-module.exports = mongoose.model('Followers', FollowersSchema);
+module.exports = mongoose.model("Followers", FollowersSchema);

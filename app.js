@@ -83,7 +83,7 @@ app.use(session({
 const skipUrls = ["/ping/", "/ping"];
 const morganOptions = { skip: (req) => skipUrls.includes(req.url) };
 // app.use(morgan(config.morgan_log_format, morganOptions));
-app.use(morgan("combined", morganOptions));
+app.use(morgan("dev", morganOptions));
 
 app.get("/", (req, res) => { res.render(path.resolve("./views/index.ejs")); });
 const { APPID, PORT } = process.env;

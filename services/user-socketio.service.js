@@ -16,8 +16,8 @@ const addUser = (input) => {
     return users;
 };
 
-const removeUser = (socketId) => {
-    const newUser = users.filter((item) => item.socketId !== socketId);
+const removeUser = (userId) => {
+    const newUser = users.filter((item) => item.userId !== userId);
     users = newUser;
     return true;
 };

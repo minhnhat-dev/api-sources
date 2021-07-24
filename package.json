@@ -6,13 +6,14 @@
     "client-install": "npm install --prefix client",
     "start": "node index.js",
     "start-dev": "NODE_ENV=development nodemon index.js",
-    "local": "REDIS_URL=127.0.0.1 PORT=5000 NODE_ENV=localhost nodemon index.js"
+    "local": "REDIS_URL=127.0.0.1 PORT=3000 NODE_ENV=localhost nodemon index.js"
   },
   "dependencies": {
     "@socket.io/redis-adapter": "^7.0.0",
     "ajv": "^6.12.2",
     "ajv-bsontype": "^1.0.7",
     "ajv-errors": "^1.0.1",
+    "amqplib": "^0.8.0",
     "axios": "^0.21.1",
     "bcryptjs": "^2.4.3",
     "body-parser": "^1.19.0",
@@ -53,9 +54,9 @@
     "redis": "^3.0.2",
     "response-time": "^2.3.2",
     "socket.io": "^3.1.0",
+    "socket.io-adapter": "~2.2.0",
     "socket.io-redis": "^6.1.1",
-    "validator": "^13.1.17",
-    "socket.io-adapter": "~2.2.0"
+    "validator": "^13.1.17"
   },
   "devDependencies": {
     "nodemon": "^2.0.7"

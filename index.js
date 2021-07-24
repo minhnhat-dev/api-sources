@@ -1,6 +1,8 @@
 const app = require("./app");
 const configs = require("./configs");
 const { startSocketioServer } = require("./socketio");
+// const publisher = require("./rabbitmq/publisher");
+// const consumer = require("./rabbitmq/consumer");
 
 const { APPID } = process.env;
 
@@ -8,7 +10,7 @@ const server = app.listen(configs.port, () => {
     console.log(`🚀 Running on port ${configs.port} APPID: {${APPID}}`);
 });
 
-// startSocketioServer(server);
+startSocketioServer(server);
 process.on("uncaughtException", (exception) => {
     console.error(exception);
 });

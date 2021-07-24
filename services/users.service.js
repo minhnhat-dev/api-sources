@@ -18,7 +18,8 @@ async function getListUsers(query) {
         sort,
         select,
         search_text: searchText,
-        is_all: isAll = 0
+        isAll = false,
+        ids
     } = query;
 
     const conditions = {};
@@ -32,12 +33,17 @@ async function getListUsers(query) {
         ];
     }
 
+    if (ids) {
+        const userIds = ids.split(",");
+        conditions._id = { $in: userIds };
+    }
+
     const [users = [], total = 0] = await Promise.all([
         Users
             .find(conditions)
             .sort(sortObject)
-            .skip(parseInt(isAll) ? 0 : Number(skip))
-            .limit(parseInt(isAll) ? 0 : Number(limit))
+            .skip(isAll ? 0 : Number(skip))
+            .limit(isAll ? 0 : Number(limit))
             .select(selects)
             .lean(),
         Users.countDocuments(conditions)

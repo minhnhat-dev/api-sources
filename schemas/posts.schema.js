@@ -1,21 +1,25 @@
 const shared = require("./shared.schema");
+const { VISIBLE } = require("../constants/posts.constant");
 
 const create = {
     type: "object",
-    required: ["userId"],
+    required: ["user"],
     properties: {
-        userId: shared.mongoObjectId,
-        description: { type: "string" },
-        image: { type: "object" }
+        user: shared.mongoObjectId,
+        content: { type: "string" },
+        images: { type: "array" },
+        visible: { type: "number", enum: Object.values(VISIBLE) }
     }
 };
 
 const update = {
     type: "object",
-    required: ["userId"],
+    required: ["user"],
     properties: {
-        userId: shared.mongoObjectId,
-        description: { type: "string" }
+        user: shared.mongoObjectId,
+        content: { type: "string" },
+        images: { type: "array" },
+        visible: { type: "number", enum: Object.values(VISIBLE) }
     }
 };
 
@@ -56,11 +60,57 @@ const getTimeline = {
     }
 };
 
+const getLikesPost = {
+    type: "object",
+    properties: {
+        skip: shared.getListSkip,
+        limit: shared.getListLimit,
+        isAll: { type: "boolean", default: false },
+        select: { type: "string" },
+        sort: { type: "string" }
+    }
+};
+
+const createComment = {
+    type: "object",
+    required: ["userId", "content"],
+    properties: {
+        userId: shared.mongoObjectId,
+        content: { type: "string", minLength: 1 }
+    }
+};
+
+const getComments = {
+    type: "object",
+    properties: {
+        skip: shared.getListSkip,
+        limit: shared.getListLimit,
+        isAll: { type: "boolean", default: false },
+        select: { type: "string" },
+        sort: { type: "string" },
+        userId: shared.mongoObjectId
+    }
+};
+
+const likeComment = {
+    type: "object",
+    required: ["userId", "postId", "commentId"],
+    properties: {
+        userId: shared.mongoObjectId,
+        postId: shared.mongoObjectId,
+        commentId: shared.mongoObjectId
+    }
+};
+
 module.exports = {
     create,
     update,
     getList,
     likePost,
     unlikePost,
-    getTimeline
+    getTimeline,
+    getLikesPost,
+    createComment,
+    getComments,
+    likeComment
 };

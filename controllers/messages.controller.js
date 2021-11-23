@@ -2,9 +2,7 @@
 const fs = require("fs");
 const path = require("path");
 
-const {
-    validateCreateMessage
-} = require("../validators/messages.validator");
+const { validateCreateMessage } = require("../validators/messages.validator");
 const { validateUser } = require("../validators/users.validator");
 const { messagesServices } = require("../services");
 const { SKIP_DEFAULT, LIMIT_DEFAULT } = require("../constants/global.constant");

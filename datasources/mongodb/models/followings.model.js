@@ -1,5 +1,5 @@
-const mongoose = require('mongoose');
-const { STATUS } = require('../../../constants/followings.constant');
+const mongoose = require("mongoose");
+const { STATUS } = require("../../../constants/followings.constant");
 
 const { Schema } = mongoose;
 
@@ -7,7 +7,7 @@ const { ObjectId } = Schema.Types;
 
 const FollowingsSchema = new Schema({
     userId: ObjectId,
-    followingId: ObjectId,
+    followingId: { type: ObjectId, ref: "Users" },
     status: {
         type: Number,
         enum: Object.values(STATUS),
@@ -15,4 +15,4 @@ const FollowingsSchema = new Schema({
     }
 }, { versionKey: false, timestamps: true });
 
-module.exports = mongoose.model('Followings', FollowingsSchema);
+module.exports = mongoose.model("Followings", FollowingsSchema);

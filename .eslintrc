@@ -1,0 +1,72 @@
+{
+    "env": {
+        "browser": true,
+        "commonjs": true,
+        "es6": true,
+        "node": true,
+        "mocha": true,
+        "jest": true
+    },
+    "parserOptions": {
+        "ecmaFeatures": {
+            "jsx": true,
+            "experimentalObjectRestSpread": true
+        },
+        "sourceType": "module"
+    },
+    "globals": {
+        "logger": true,
+        "io": true
+    },
+    "extends": ["airbnb", "plugin:import/errors", "plugin:import/warnings"],
+    "root": true,
+    "rules": {
+        "no-empty": 0,
+        "quotes": ["error", "double"],
+        "semi": ["error", "always"],
+        "indent": ["error", 4],
+        "no-multi-spaces": ["error"],
+        "no-trailing-spaces": 2,
+        "no-eval": 1,
+        "class-methods-use-this": "off",
+        "comma-dangle": ["error", "never"],
+        "no-const-assign": "warn",
+        "no-this-before-super": "warn",
+        "no-undef": "warn",
+        "no-unreachable": "warn",
+        "no-unused-vars": "warn",
+        "constructor-super": "warn",
+        "valid-typeof": "warn",
+        "no-underscore-dangle": "off",
+        "no-nested-ternary": "off",
+        "no-implicit-globals": "off",
+        "prefer-destructuring": [
+            "error",
+            {
+                "VariableDeclarator": {
+                    "array": false,
+                    "object": true
+                },
+                "AssignmentExpression": {
+                    "array": false,
+                    "object": false
+                }
+            },
+            {
+                "enforceForRenamedProperties": false
+            }
+        ],
+        "no-param-reassign": ["error", { "props": false }],
+        "no-use-before-define": ["error", { "functions": false }],
+        "max-len": [
+            "warn",
+            { "code": 120, "ignoreStrings": true, "ignoreTemplateLiterals": true, "ignoreRegExpLiterals": true }
+        ],
+        "object-curly-newline": ["error", { "ExportDeclaration": { "multiline": true, "minProperties": 4 } }],
+        "react/jsx-filename-extension": [1, { "extensions": [".js", ".jsx"] }],
+        "react/destructuring-assignment": "off",
+        "import/prefer-default-export": "off",
+        "no-console": ["warn", { "allow": ["time", "timeEnd", "timeLog"] }],
+        "no-tabs": 0
+    }
+}

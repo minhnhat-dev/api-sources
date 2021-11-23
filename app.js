@@ -1,3 +1,5 @@
+require("dotenv").config();
+
 const path = require("path");
 const express = require("express");
 const cookieParser = require("cookie-parser");
@@ -8,16 +10,14 @@ const compression = require("compression");
 const responseTime = require("response-time");
 const session = require("express-session");
 const passport = require("passport");
-const socketio = require("socket.io");
 const redis = require("redis");
 const RedisStore = require("connect-redis")(session);
-const http = require("http");
 const { REDIS_PORT, REDIS_URL, SESSION_SECRET } = require("./datasources/redis/configs");
 const { loginFacebook } = require("./middlewares/login.facebook");
 const { loginGoogle } = require("./middlewares/login.google");
-const routes = require("./routes");
+const routesV1 = require("./routes/v1");
 const { errorMiddleware } = require("./middlewares/error-handlers");
-const { verifyToken } = require("./middlewares/authentication");
+const { handlePagging } = require("./middlewares/response.middleware");
 require("express-async-errors");
 require("./datasources");
 
@@ -50,14 +50,13 @@ app.use(require("./middlewares/normalize-mongoose"));
 app.set("views", path.join(__dirname, "views"));
 app.set("view engine", "ejs");
 app.use(express.static(path.join(__dirname, "public")));
-
 // if (["localhost", "development"].includes(process.env.NODE_ENV)) {
 //     app.use(morgan("dev"));
 // } else {
 //     app.use(morgan("common"));
 // }
 
-app.use(express.json());
+app.use(express.json({ limit: "8mb" }));
 app.use(express.urlencoded());
 app.use(cookieParser());
 app.use(bodyParser.json({ extended: true }));
@@ -65,7 +64,6 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cors());
 app.use(compression());
 app.use(responseTime());
-
 /* use redis session */
 app.enable("trust proxy");
 app.use(session({
@@ -103,8 +101,8 @@ app.get("/api2", (req, res) => {
     const ip = req.headers["x-forwarded-for"] || "";
     res.status(200).send(`api2 ===> APPID: ${APPID}, id: ${ip}`);
 });
-
-app.use(routes);
+app.use(handlePagging);
+app.use("/api/v1", routesV1);
 app.use(errorMiddleware);
 
 module.exports = app;

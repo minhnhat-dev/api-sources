@@ -4,7 +4,7 @@ const models = require("./models");
 const controllers = require("./controllers");
 const utils = require("./utils");
 
-let url = config.MONGO_LOCALHOST;
+let url = config.MONGO_DB;
 
 if (
     process.env.NODE_ENV === "development"

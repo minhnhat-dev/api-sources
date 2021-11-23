@@ -3,33 +3,31 @@ const { RABBITMQ_HOST } = process.env;
 const rabbitmqConfig = {
     HOST: RABBITMQ_HOST || "localhost",
     PORT: "5672",
-    USER: "consumer",
-    PASS: "123456",
+    USER: "admin",
+    PASS: "admin",
     dirname: "/var/log",
-    CHANNEL_CONFIGS: [
+    EXCHANGES: [
         {
-            QUEUE: "normal",
-            EXCHANGE: "normal",
+            EXCHANGE_NAME: "exchange_logs",
             PREFETCH: 10,
-            PRIORITY: 10,
             MAX_RETRY_COUNT: 1,
-            RETRY_COUNT_AFTER: 30000
+            RETRY_COUNT_AFTER: 30000,
+            QUEUES: [
+                "warning",
+                "normal",
+                "dangerous"
+            ]
         },
         {
-            QUEUE: "normal02",
-            EXCHANGE: "normal02",
+            EXCHANGE_NAME: "exchange_message",
             PREFETCH: 10,
-            PRIORITY: 7,
             MAX_RETRY_COUNT: 1,
-            RETRY_COUNT_AFTER: 30000
-        },
-        {
-            QUEUE: "normal03",
-            EXCHANGE: "normal03",
-            PREFETCH: 10,
-            PRIORITY: 5,
-            MAX_RETRY_COUNT: 1,
-            RETRY_COUNT_AFTER: 30000
+            RETRY_COUNT_AFTER: 30000,
+            QUEUES: [
+                "webhook",
+                "sync_data",
+                "update_data"
+            ]
         }
     ]
 };

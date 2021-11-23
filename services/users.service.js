@@ -1,8 +1,10 @@
 /* eslint-disable radix */
 const _ = require("lodash");
-const { Users, Followers, Followings } = require("../datasources/mongodb/models");
+const { Users, Followers, Followings, RefreshTokens } = require("../datasources/mongodb/models");
 const { convertSelectQuery, buildSortStringToObject } = require("../helpers/query.helper");
 const { SKIP_DEFAULT, LIMIT_DEFAULT } = require("../constants/global.constant");
+const { STATUS } = require("../constants/followings.constant");
+const FollowingDto = require("../dtos/followings.dtos");
 
 async function createUser(data) {
     const user = new Users(data);
@@ -11,13 +13,23 @@ async function createUser(data) {
     return user;
 }
 
+async function createUserPhoneEmail(data) {
+    const user = await Users.create(data);
+    return user;
+}
+
+async function storageRefreshToken(data) {
+    const refreshToken = await RefreshTokens.create(data);
+    return refreshToken;
+}
+
 async function getListUsers(query) {
     const {
         skip = SKIP_DEFAULT,
         limit = LIMIT_DEFAULT,
         sort,
         select,
-        search_text: searchText,
+        searchText,
         isAll = false,
         ids
     } = query;
@@ -28,8 +40,9 @@ async function getListUsers(query) {
 
     if (searchText) {
         conditions.$or = [
-            { name: { $regex: searchText.trim(), $options: "i" } },
-            { email: { $regex: searchText.trim(), $options: "i" } }
+            // { name: { $regex: searchText.trim(), $options: "i" } },
+            // { email: { $regex: searchText.trim(), $options: "i" } },
+            { username: { $regex: searchText.trim(), $options: "i" } }
         ];
     }
 
@@ -58,6 +71,10 @@ async function getUser(id) {
 
 async function updateUser(id, data) {
     const userUpdated = await Users.findByIdAndUpdate(id, { $set: data }, { new: true });
+    if (data.password) {
+        userUpdated.setPassword(data.password);
+        await userUpdated.save();
+    }
     return userUpdated;
 }
 
@@ -82,7 +99,7 @@ async function handleFollowTransation(userId, data) {
     const session = await Users.startSession();
     session.startTransaction();
     try {
-    /* create follower  */
+        /* create follower  */
         const follower = await Followers.create([{ userId: followerId, followerId: userId }], { session });
         console.log("follower", follower);
         const following = await Followings.create([{ userId, followingId: followerId }], { session });
@@ -187,7 +204,7 @@ async function getFollowings(query) {
     if (userId) {
         conditions.userId = userId;
     }
-
+    console.log("conditions", conditions);
     const [followings = [], total = 0] = await Promise.all([
         Followings
             .find(conditions)
@@ -195,26 +212,32 @@ async function getFollowings(query) {
             .skip(Number(skip))
             .limit(Number(limit))
             .select(selects)
+            .populate({
+                path: "followingId",
+                select: "-password -salt"
+            })
             .lean(),
         Followings.countDocuments(conditions)
     ]);
-    const followingIds = followings.map((item) => item.followingId);
-    const users = await getUserByIds(followingIds);
-    const usersKeyById = _.keyBy(users, "_id");
-
     /* attach user into response */
-    const newFollowings = followings.map((item) => {
-        const { followingId } = item;
-        const user = usersKeyById[followingId.toString()] || null;
-        item.user = user;
-        return item;
-    });
-
+    const newFollowings = followings.map((item) => new FollowingDto(item));
     return { followings: newFollowings, total };
 }
 
 async function getUserByIds(ids) {
     return Users.find({ _id: { $in: ids } }).lean();
+}
+
+async function getUserByFilter(filter = {}) {
+    return Users.findOne(filter);
+}
+
+async function getAllFollowings(userId) {
+    const followings = await Followings
+        .find({ userId, status: STATUS.ACTIVE })
+        .select("_id followingId")
+        .lean();
+    return followings;
 }
 
 module.exports = {
@@ -225,5 +248,9 @@ module.exports = {
     handleFollow,
     handleUnFollow,
     getFollowers,
-    getFollowings
+    getFollowings,
+    getUserByFilter,
+    createUserPhoneEmail,
+    storageRefreshToken,
+    getAllFollowings
 };

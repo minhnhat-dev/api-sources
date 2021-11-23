@@ -1,11 +1,10 @@
 /* eslint-disable no-prototype-builtins */
 /* eslint-disable no-restricted-syntax */
-const mung = require('express-mung');
+const mung = require("express-mung");
 
 const classifiedKeys = [
-    'password',
-    'salt',
-    'hash'
+    "password",
+    "salt"
 ];
 /* Remove any classified information from the response. */
 function redact(body, req, res) {
@@ -35,7 +34,7 @@ function normalizeMongooseObject(_object) {
     if (!_object) return _object;
 
     let object;
-    if (typeof _object.toJSON === 'function') {
+    if (typeof _object.toJSON === "function") {
         object = _object.toJSON();
     } else {
         object = _object;
@@ -51,13 +50,13 @@ function normalizeMongooseObject(_object) {
             if (object.hasOwnProperty(key)) {
                 const value = object[key];
 
-                if (key === '_id') {
+                if (key === "_id") {
                     object.id = object._id;
                     delete object._id;
-                    if (typeof object.id === 'object') {
+                    if (typeof object.id === "object") {
                         object.id = object.id.toString();
                     }
-                } else if (key === '__v') {
+                } else if (key === "__v") {
                     delete object.__v;
                 } else if (value && value instanceof Object && !(value instanceof Array)) {
                     object[key] = normalizeMongooseObject(value);

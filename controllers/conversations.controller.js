@@ -2,10 +2,7 @@
 const fs = require("fs");
 const path = require("path");
 
-const {
-    validateCreateConversation,
-    validateConversation
-} = require("../validators/conversation.validator");
+const { validateCreateConversation, validateConversation } = require("../validators/conversation.validator");
 const { validateUser } = require("../validators/users.validator");
 const { conversationsServices } = require("../services");
 const { SKIP_DEFAULT, LIMIT_DEFAULT } = require("../constants/global.constant");

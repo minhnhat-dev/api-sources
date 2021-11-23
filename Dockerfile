@@ -1,4 +1,4 @@
-FROM node:12.18.4
+FROM node:14.13.0
 # Create app directory
 WORKDIR /app
 # Install app dependencies

@@ -2,9 +2,13 @@ const axios = require("axios");
 const CreateError = require("http-errors");
 const faker = require("faker");
 const { userConstant } = require("../constants");
-const { Users, Followers, Followings } = require("../datasources/mongodb/models");
-const { signAccessToken, verifyToken } = require("../middlewares/authentication");
-const { ERROR_CODES } = require("../constants/users.constant");
+const { Users, Followings, RefreshTokens } = require("../datasources/mongodb/models");
+const { signAccessToken, signRefreshToken } = require("../middlewares/authentication.middleware");
+const { ERROR_CODES, TYPES } = require("../constants/users.constant");
+const FileHelper = require("../helpers/files.helper");
+const AuthService = require("../services/auth.service");
+const { STATUS } = require("../constants/followings.constant");
+const { getAllFollowings } = require("../services/users.service");
 
 async function validateAccessTokenFaceBook(body) {
     /* Get account id */
@@ -52,7 +56,8 @@ async function validateCreateUser(body) {
 
 async function validateUserLogin(body) {
     const { email, password } = body;
-    const user = await Users.findOne({ email });
+
+    let user = await Users.findOne({ email });
 
     if (!user) {
         throw new CreateError.NotFound(ERROR_CODES.ERROR_USER_NOT_FOUND);
@@ -63,22 +68,32 @@ async function validateUserLogin(body) {
     if (!isCorrect) {
         throw new CreateError.BadRequest(ERROR_CODES.ERROR_PASSWORD_INVALID);
     }
-    const token = signAccessToken(user);
-    return { user, token };
+    /* get all followings id */
+    const followings = await getAllFollowings(user._id);
+    user = user.toObject();
+    user.followings = followings;
+    return user;
 }
 
-async function validateUser(id) {
-    const user = await Users.findById(id);
+async function validateUser(id, isGetFollowings = true) {
+    const user = await Users.findById(id).lean();
 
     if (!user) {
         throw new CreateError.NotFound(ERROR_CODES.ERROR_USER_NOT_FOUND);
+    }
+    /* get all followings id */
+    if (isGetFollowings) {
+        const followings = await getAllFollowings(user._id);
+        user.followings = followings;
     }
 
     return user;
 }
 
 async function validateUpdateUser(id, body) {
+    const { coverPicture } = body;
     const user = await validateUser(id);
+    if (coverPicture) body.activated = true;
     return body;
 }
 
@@ -134,6 +149,60 @@ async function validateUnFollowUser(body) {
     return body;
 }
 
+async function validateUserEmailPhone(body) {
+    const { type, email, phone } = body;
+    const newBody = { type };
+
+    if (type === TYPES.EMAIL && !email) throw new CreateError.BadRequest(ERROR_CODES.ERROR_EMAIL_IS_REQUIRED);
+    if (type === TYPES.PHONE && !phone) throw new CreateError.BadRequest(ERROR_CODES.ERROR_PHONE_IS_REQUIRED);
+
+    if (type === TYPES.EMAIL && email) {
+        const countEmail = await Users.countDocuments({ email });
+        if (countEmail) {
+            throw new CreateError.BadRequest(ERROR_CODES.ERROR_EMAIL_ALREADY_EXISTS);
+        }
+        newBody.email = email;
+    }
+
+    if (type === TYPES.PHONE && phone) {
+        const countPhone = await Users.countDocuments({ phone });
+        if (countPhone) {
+            throw new CreateError.BadRequest(ERROR_CODES.ERROR_PHONE_ALREADY_EXISTS);
+        }
+        newBody.phone = phone;
+    }
+
+    return newBody;
+}
+
+async function validateRefreshToken(body) {
+    const { refreshToken } = body;
+    const userData = await AuthService.verifyRefreshToken(refreshToken);
+    const { id: userId } = userData;
+    const token = await RefreshTokens.findOne({ userId, token: refreshToken }).lean();
+    if (!token) throw new CreateError.Unauthorized("error_token_invalid");
+    const user = await Users.findOne({ _id: userId }).lean();
+    if (!user) throw new CreateError.NotFound("error_user_not_found");
+    /* generate tokens */
+    const payload = {
+        id: userId,
+        activated: false
+    };
+    /* get all followings id */
+    const followings = await getAllFollowings(user._id);
+    user.followings = followings;
+    const { accessToken, refreshToken: newRefreshToken } = AuthService.generateTokens(payload);
+
+    return { user, accessToken, refreshToken: newRefreshToken, auth: true };
+}
+
+async function validateLogout(body) {
+    const { refreshToken } = body;
+    const token = await RefreshTokens.findOne({ token: refreshToken }).lean();
+    if (!token) throw new CreateError.Unauthorized("error_token_invalid");
+    return token;
+}
+
 module.exports = {
     validateAccessTokenFaceBook,
     validateCreateUser,
@@ -141,5 +210,8 @@ module.exports = {
     validateUser,
     validateUpdateUser,
     validateFollowUser,
-    validateUnFollowUser
+    validateUnFollowUser,
+    validateUserEmailPhone,
+    validateRefreshToken,
+    validateLogout
 };

@@ -15,24 +15,14 @@ async function createConversation(data) {
 }
 
 async function getListConversations(query) {
-    const {
-        skip = SKIP_DEFAULT,
-        limit = LIMIT_DEFAULT,
-        sort,
-        select,
-        searchText,
-        isAll = false,
-        userId
-    } = query;
+    const { skip = SKIP_DEFAULT, limit = LIMIT_DEFAULT, sort, select, searchText, isAll = false, userId } = query;
 
     const conditions = {};
     const selects = convertSelectQuery(select);
     const sortObject = buildSortStringToObject(sort);
 
     if (searchText) {
-        conditions.$or = [
-            { name: { $regex: searchText.trim(), $options: "i" } }
-        ];
+        conditions.$or = [{ name: { $regex: searchText.trim(), $options: "i" } }];
     }
 
     if (userId) {
@@ -46,7 +36,7 @@ async function getListConversations(query) {
             .limit(isAll ? 0 : Number(limit))
             .populate({
                 path: "members",
-                select: "_id name profilePicture"
+                select: "_id username profilePicture"
             })
             .select(selects)
             .lean(),
@@ -61,12 +51,11 @@ async function checkConversationExists(query) {
     const usersSplit = users.split(",");
 
     if (type === TYPES.PRIVATE) {
-        const conversation = await Conversations
-            .findOne({
-                type,
-                status: STATUS.ACTIVE,
-                members: { $all: _.uniq(usersSplit) }
-            }).lean();
+        const conversation = await Conversations.findOne({
+            type,
+            status: STATUS.ACTIVE,
+            members: { $all: _.uniq(usersSplit) }
+        }).lean();
         if (!conversation) return { is_exists: false, conversation: null };
         return { is_exists: true, conversation };
     }

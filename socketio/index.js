@@ -3,10 +3,11 @@ const redis = require("redis");
 const redisAdapter = require("socket.io-redis");
 const { REDIS_PORT, REDIS_URL, SESSION_SECRET } = require("../datasources/redis/configs");
 const { handleChatSocketIO } = require("./chat.socketio");
+const { globaltSocketIO } = require("./global.socketio");
 
 function startSocketioServer(server) {
     const io = socketServer(server, {
-        path: "/v1/socketio",
+        path: "/api/v1/socketio",
         allowEIO3: true,
         cors: {
             origin: "http://localhost:3002",
@@ -20,6 +21,7 @@ function startSocketioServer(server) {
     const subClient = pubClient.duplicate();
     io.adapter(redisAdapter({ pubClient, subClient }));
     handleChatSocketIO(io);
+    globaltSocketIO(io);
     global.io = io;
     console.log("+ startSocketioServer() Socket.io Server running...");
 }

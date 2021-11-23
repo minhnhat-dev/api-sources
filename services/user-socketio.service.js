@@ -1,32 +1,32 @@
-const CreateError = require("http-errors");
+const CreateError = require("http-errors")
 
-let users = [];
+let users = []
 
-const addUser = (input) => {
-    const { userId, socketId } = input;
-    if (!userId || !socketId) throw new CreateError.BadRequest("error_userId_required");
+const addUser = input => {
+    const { userId, socketId } = input
+    if (!userId || !socketId) throw new CreateError.BadRequest("error_userId_required")
 
-    const existingUser = users.find((user) => user.userId === userId);
+    const existingUser = users.find(user => user.userId === userId)
 
     if (!existingUser) {
-        const user = { userId, socketId };
-        users.push(user);
+        const user = { userId, socketId }
+        users.push(user)
     }
 
-    return users;
-};
+    return users
+}
 
-const removeUser = (userId) => {
-    const newUser = users.filter((item) => item.userId !== userId);
-    users = newUser;
-    return true;
-};
+const removeUser = userId => {
+    const newUser = users.filter(item => item.userId !== userId)
+    users = newUser
+    return true
+}
 
-const getUser = (userId) => users.find((user) => user.userId === userId);
-const getUsers = () => users;
+const getUser = userId => users.find(user => user.userId === userId)
+const getUsers = () => users
 
-const getUsersInRoom = (roomName) => users.filter((user) => user.roomName === roomName);
-const getUsersOnline = () => users;
+const getUsersInRoom = roomName => users.filter(user => user.roomName === roomName)
+const getUsersOnline = () => users
 
 module.exports = {
     addUser,
@@ -35,4 +35,4 @@ module.exports = {
     getUsersInRoom,
     getUsersOnline,
     getUsers
-};
+}

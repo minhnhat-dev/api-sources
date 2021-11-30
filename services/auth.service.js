@@ -11,9 +11,9 @@ const accessTokenLife = process.env.ACCESS_TOKEN_LIFE || "24h";
 const accessTokenSecret = process.env.ACCESS_TOKEN_SECRET || "access-token-secret";
 const refreshTokenLife = process.env.REFRESH_TOKEN_LIFE || "1y";
 const refreshTokenSecret = process.env.REFRESH_TOKEN_SECRET || "refresh-token-secret";
-const twilio = require("twilio")(smsSid, smsAuthToken, {
-    lazyLoading: true
-});
+// const twilio = require("twilio")(smsSid, smsAuthToken, {
+//     lazyLoading: true
+// });
 const mailer = require("../helpers/mailer.helper");
 const { TYPES } = require("../constants/users.constant");
 const { RefreshTokens } = require("../datasources/mongodb/models");
@@ -52,12 +52,12 @@ class AuthService {
     async sendBySms({ phone, otp }) {
         /* tài khoản miễn phí phải verify mobile mới gửi được */
         /* note sđt xác minh đầu tiên nó k gửi message đc */
-        const result = await twilio.messages.create({
-            to: phone,
-            from: process.env.SMS_FROM_NUMBER,
-            body: `Your minhnhat.dev OTP is ${otp}`
-        });
-        return result;
+        // const result = await twilio.messages.create({
+        //     to: phone,
+        //     from: process.env.SMS_FROM_NUMBER,
+        //     body: `Your minhnhat.dev OTP is ${otp}`
+        // });
+        // return result;
     }
 
     async sendMail({ otp, email }) {

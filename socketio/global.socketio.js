@@ -116,6 +116,14 @@ function globaltSocketIO(io) {
                 });
             }
         });
+
+        // Message
+        socket.on("addMessage", (msg) => {
+            const userFound = users.find((userOnline) => userOnline.userId === msg.receiver);
+            if (userFound) {
+                socket.to(`${userFound.socketId}`).emit("addMessageToClient", msg);
+            }
+        });
     });
 }
 

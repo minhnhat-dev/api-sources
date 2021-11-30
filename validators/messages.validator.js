@@ -1,52 +1,45 @@
 const CreateError = require("http-errors");
 const _ = require("lodash");
 const { Conversations, Users } = require("../datasources/mongodb/models");
-const { ERROR_CODES, TYPES, STATUS } = require("../constants/messages.constant");
-const { STATUS: CONVERSATION_STATUS } = require("../constants/conversations.constant");
-const { validateUser } = require("./users.validator");
+const { STATUS: CONVERSATION_STATUS, ERROR_CODES } = require("../constants/conversations.constant");
 
 async function validateCreateMessage(body) {
     const {
-        conversationId,
-        sender
+        conversationId = "",
+        sender,
+        receiver
     } = body;
     /* validate conversation */
-    const conversation = await Conversations
-        .findOne({
-            _id: conversationId,
-            status: CONVERSATION_STATUS.ACTIVE
-        })
-        .select("_id status members")
-        .lean();
+    let newConversationId = conversationId;
+    if (!conversationId) {
+        const dataConversation = {
+            members: [
+                sender,
+                receiver
+            ]
+        };
+        const newConversation = await Conversations.create(dataConversation);
+        newConversationId = newConversation._id;
+    } else {
+        const conversationFound = await Conversations
+            .findOne({
+                _id: conversationId,
+                status: CONVERSATION_STATUS.ACTIVE
+            })
+            .select("_id status members")
+            .lean();
 
-    if (!conversation) {
-        const errorNotFound = new CreateError.BadRequest(ERROR_CODES.CONVERSATION_NOT_FOUND);
-        errorNotFound.data = { conversationId };
-        throw errorNotFound;
+        if (!conversationFound) {
+            throw new CreateError.NotFound(ERROR_CODES.CONVERSATION_NOT_FOUND);
+        }
     }
 
-    /* validate user */
-    const user = await Users
-        .findOne({ _id: sender })
-        .select("_id")
-        .lean();
+    const newBody = {
+        ...body,
+        conversation: newConversationId
+    };
 
-    if (!user) {
-        const errorNotFound = new CreateError.BadRequest(ERROR_CODES.SENDER_NOT_FOUND);
-        errorNotFound.data = { sender };
-        throw errorNotFound;
-    }
-    /* validate is members */
-    const { members = [] } = conversation;
-    const isMembers = !!members.find((member) => member.toString() === sender.toString());
-
-    if (!isMembers) {
-        const errorNotMember = new CreateError.BadRequest(ERROR_CODES.SENDER_INVALID);
-        errorNotMember.data = { sender };
-        throw errorNotMember;
-    }
-
-    return body;
+    return newBody;
 }
 
 module.exports = {

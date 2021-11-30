@@ -7,17 +7,7 @@ const { SKIP_DEFAULT, LIMIT_DEFAULT } = require("../constants/global.constant");
 
 async function createMessage(data) {
     const message = await Messages.create(data);
-    /* attach user */
-    const messageObject = message.toObject();
-    const { sender } = messageObject;
-
-    const user = await Users
-        .findOne({ _id: sender })
-        .select("_id name")
-        .lean();
-
-    messageObject.sender = user;
-    return messageObject;
+    return message;
 }
 
 async function getListMessages(query) {
@@ -31,7 +21,6 @@ async function getListMessages(query) {
         conversationId,
         status
     } = query;
-
     const conditions = { status: STATUS.ACTIVE };
     const selects = convertSelectQuery(select);
     const sortObject = buildSortStringToObject(sort);
@@ -43,7 +32,7 @@ async function getListMessages(query) {
     }
 
     if (conversationId) {
-        conditions.conversationId = conversationId;
+        conditions.conversation = conversationId;
     }
 
     if (status) {
@@ -55,10 +44,6 @@ async function getListMessages(query) {
             .sort(sortObject)
             .skip(isAll ? 0 : Number(skip))
             .limit(isAll ? 0 : Number(limit))
-            .populate({
-                path: "sender",
-                select: "_id name"
-            })
             .select(selects)
             .lean(),
         Messages.countDocuments(conditions)

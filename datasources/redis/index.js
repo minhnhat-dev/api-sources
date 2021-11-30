@@ -19,3 +19,24 @@
 //         maxAge: 30000 // 30s
 //     }
 // });
+
+// me kip redis
+// const redis = require("redis")
+// const { REDIS_PORT, REDIS_URL } = require("./config")
+
+// const HOST = REDIS_URL || "localhost"
+// const PORT = REDIS_PORT || 6379
+
+// console.log("HOST", HOST)
+// console.log("PORT", PORT)
+
+// const redisClient = redis.createClient({
+//     host: HOST,
+//     port: PORT
+// })
+
+// redisClient.on("connect", () => {
+//     console.log("📒 Redis is ready")
+// })
+
+// module.exports = redisClient

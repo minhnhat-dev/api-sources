@@ -3,15 +3,13 @@ const { STATUS, TYPES } = require("../constants/messages.constant");
 
 const create = {
     type: "object",
-    required: ["sender", "conversationId", "type"],
+    required: ["sender", "receiver", "conversationId"],
     properties: {
         conversationId: shared.mongoObjectId,
         sender: shared.mongoObjectId,
-        type: {
-            type: "number",
-            enum: Object.values(TYPES)
-        },
-        text: { type: "string" }
+        receiver: shared.mongoObjectId,
+        text: { type: "string" },
+        media: { type: "array" }
     }
 };
 

@@ -10,7 +10,7 @@ function startSocketioServer(server) {
         path: "/api/v1/socketio",
         allowEIO3: true,
         cors: {
-            origin: "http://facebook-clone-minhnhatdev.surge.sh",
+            origin: "*",
             // origin: "http://localhost:3002",
             methods: ["GET", "POST"],
             credentials: true,

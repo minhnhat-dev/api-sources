@@ -15,14 +15,15 @@ async function upload(key, req, res, options) {
     }
 
     const storage = multer.diskStorage({
-        destination(req, file, cb) {
+        destination: (req, file, cb) => {
             const dest = path.join(path.resolve("./public/storage", config.bucket));
             if (!fs.existsSync(dest)) {
                 fs.mkdirSync(dest);
             }
             cb(null, dest);
         },
-        filename(req, file, cb) {
+        filename: (req, file, cb) => {
+            const match = ["image/png", "image/jpeg"];
             crypto.pseudoRandomBytes(16, (err, raw) => {
                 cb(null, `${raw.toString("hex") + Date.now()}.${file.originalname}`);
             });

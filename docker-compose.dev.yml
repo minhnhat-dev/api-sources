@@ -1,0 +1,101 @@
+version: "3"
+services:
+  haproxy:
+    build: ./haproxy
+    links:
+      - node-server-1
+      - node-server-2
+      - node-server-3
+    ports:
+      - "3000:80"
+    volumes:
+      - ./haproxy/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
+    depends_on: 
+      - node-server-1
+      - node-server-2
+      - node-server-3
+  node-server-1:
+    build:
+      context: .
+      args:
+        NODE_ENV: development
+    links:
+      - redis
+    expose:
+      - "3000"
+    volumes:
+      - ./:/app
+      - /app/node_modules
+      - ./public/storage/images:/app/public/storage/images
+    environment:
+      - APPID=node-1
+      - NODE_ENV=development
+      - MONGO_USER=nhatnguyen
+      - MONGO_PASSWORD=mypassword
+      - SESSION_SECRET=secret
+    command: npm run start-dev
+    depends_on: 
+      - mongodb
+    restart: always
+  node-server-2:
+    build:
+      context: .
+      args:
+        NODE_ENV: development
+    links:
+      - redis
+    expose:
+      - "3000"
+    volumes:
+      - ./:/app
+      - /app/node_modules
+      - ./public/storage/images:/app/public/storage/images
+    environment:
+      - APPID=node-2
+      - NODE_ENV=development
+      - MONGO_USER=nhatnguyen
+      - MONGO_PASSWORD=mypassword
+      - SESSION_SECRET=secret
+    command: npm run start-dev
+    depends_on: 
+      - mongodb
+    restart: always
+  node-server-3:
+    build:
+      context: .
+      args:
+        NODE_ENV: development
+    links:
+      - redis
+    expose:
+      - "3000"
+    volumes:
+      - ./:/app
+      - /app/node_modules
+      - ./public/storage/images:/app/public/storage/images
+    environment:
+      - APPID=node-3
+      - NODE_ENV=development
+      - MONGO_USER=nhatnguyen
+      - MONGO_PASSWORD=mypassword
+      - SESSION_SECRET=secret
+    command: npm run start-dev
+    depends_on: 
+      - mongodb
+    restart: always
+  mongodb:
+    image: mongo:4.2
+    ports:
+      - "27017:27017"
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=nhatnguyen
+      - MONGO_INITDB_ROOT_PASSWORD=mypassword
+    volumes: 
+      - mongodb:/data/db
+    restart: always
+  redis:
+    image: redis:6.2.3
+    expose:
+      - "6379"
+volumes:
+  mongodb:
